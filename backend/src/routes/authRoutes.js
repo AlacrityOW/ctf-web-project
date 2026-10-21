@@ -1,15 +1,16 @@
 import express from 'express'
 import { isUser } from '../middleware/auth.js'
-import { findAccount, getPersonalData, loginVerif, logoutAll, logoutSingle, refreshSesh, registAcc } from '../controllers/authController.js'
+import { findAccount, getAllUser, getPersonalData, loginVerif, logoutAll, logoutSingle, refreshSesh, registAcc } from '../controllers/authController.js'
 
 const router = express.Router()
 
-// =========PUBLIC API==============
+// =========UNAUTHORIZED API==============
 router.post("/register",registAcc)
 router.post("/refresh",refreshSesh)
 router.post("/login",loginVerif)
 
-//=============USER API================
+//=============AUTHORIZED API================
+router.get("/user-list",isUser,getAllUser)
 router.get("/personal-data",isUser,getPersonalData)
 router.post("/logout",isUser,logoutSingle)
 router.post("/logout-all",isUser,logoutAll)

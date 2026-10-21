@@ -30,7 +30,12 @@ api.interceptors.response.use(
         if (oriReq.url.includes('/api/auth/refresh')) {
             setAccessTokenInMemory(null);
             // Only redirect if we aren't already on the login page
-            if (window.location.pathname !== '/login') {
+            // if (window.location.pathname !== '/login') {
+            //     window.location.href = '/login';
+            // }
+            const publicPages = ['/', '/login', '/register'];
+            const isPublicPage = publicPages.includes(window.location.pathname);
+             if (!isPublicPage) {
                 window.location.href = '/login';
             }
             return Promise.reject(error);
@@ -45,7 +50,13 @@ api.interceptors.response.use(
                 return api(oriReq)
             } catch (refreshError) {
                 setAccessTokenInMemory(null)
-                window.location.href = '/login'
+                // window.location.href = '/login'
+                const publicPages = ['/', '/login', '/register'];
+                const isPublicPage = publicPages.includes(window.location.pathname);
+
+                if (!isPublicPage) {
+                    window.location.href = '/login';
+                }
                 return Promise.reject(refreshError)
             }
         }

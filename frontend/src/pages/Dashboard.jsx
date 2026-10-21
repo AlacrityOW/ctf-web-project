@@ -4,20 +4,18 @@ import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/axios.js'
 import { useEffect, useState } from 'react';
 
-const stats = [
-  { label: 'Challenges Solved', value: '0' },
-  { label: 'Points', value: '0' },
-  { label: 'Rank', value: '—' },
-];
+
 
 export default function Dashboard() {
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState([]);
+  const [loading, setLoading] = useState(true)
   useEffect(()=>{
     const profRes = async ()=>{
       try {
         const response = await api.get("/api/auth/personal-data")
         // console.log(response)
         setUserData(response.data)
+        setLoading(false)
       } catch (error) {
         console.log(error)
       }
@@ -25,6 +23,11 @@ export default function Dashboard() {
     }
     profRes()
   },[])
+  const stats = [
+    { label: 'Challenges Solved', value: userData.totalSolved},
+    { label: 'Points', value: userData.totalPoints},
+    { label: 'Rank', value: '' },
+  ];
   const navigate = useNavigate();
   const { logout } = useAuth();
   
@@ -33,7 +36,7 @@ export default function Dashboard() {
     logout();
     navigate('/login');
   };
-
+  if(loading) return <div>loading</div>
   return (
     <Container size="lg" py={60}>
       <Group justify="space-between" mb="xs">

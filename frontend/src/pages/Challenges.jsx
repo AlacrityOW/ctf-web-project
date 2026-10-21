@@ -23,12 +23,12 @@ export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
 
   useEffect(() => {
-  const getChallenges = async () => {
-    const response = await api.get("/api/ctf-challenges");
-    setChallenges(response.data);
-  };
+    const getChallenges = async () => {
+      const response = await api.get("/api/ctf-challenges");
+      setChallenges(response.data);
+    };
 
-  getChallenges();
+    getChallenges();
   }, []);
   return (
     <Container size="lg" py={60}>
@@ -46,7 +46,7 @@ export default function Challenges() {
             </Group>
             <Title order={4} mb={4}>{c.title}</Title>
             <Text size="sm" c="dimmed" mb="md">{c.category}</Text>
-            <Button variant="light" fullWidth component='a' href={`/challenges/${c.fileurl}`} target="_blank">
+            <Button variant="light" fullWidth component='a' href={`/challenges/${c._id}`}>
               Open Challenge
             </Button>
           </Card>

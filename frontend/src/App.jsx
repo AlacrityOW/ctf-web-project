@@ -1,7 +1,7 @@
 import '@mantine/core/styles.css';
 import { useEffect, useState } from 'react';
 import { MantineProvider } from '@mantine/core';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, createBrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Home from './pages/Home';
@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Challenges from './pages/Challenges';
 import Leaderboard from './pages/Leaderboard';
 import api, {setAccessTokenInMemory} from './api/axios.js'
+import ChallengePage from './pages/ChallengePage'
 
 function BaseUrlRedirect({ isAuthenticated }) {
   return isAuthenticated ? (
@@ -19,6 +20,14 @@ function BaseUrlRedirect({ isAuthenticated }) {
     <Navigate to="/home" replace />
   );
 }
+
+// const route = createBrowserRouter([{
+//   path:"challenges/:id",
+//   element:<ChallengePage/>,
+//   loader:challengeLoader,
+//   },
+
+// ])
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -62,23 +71,23 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* FIXED: Uses the sub-wrapper to cleanly manage state routing */}
-            <Route path="/" element={<BaseUrlRedirect isAuthenticated={isAuthenticated} />} />
+            {/* <Route path="/" element={<BaseUrlRedirect isAuthenticated={isAuthenticated} />} /> */}
             
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login onAuthSuccess={handleAuthSuccess} />} /> 
             <Route path="/register" element={<Register />} />
             
             {/* FIXED: Pass the success trigger down as a property to the Login view */}
-            <Route path="/login" element={<Login onAuthSuccess={handleAuthSuccess} />} /> 
             
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route
-              path="/challenges"
+            <Route path="/challenges"
               element={
                 <ProtectedRoute>
                   <Challenges />
                 </ProtectedRoute>
               }
             />
+            <Route path="/challenges/:id" element={<ChallengePage/>}/>
             <Route path="/leaderboard" element={<Leaderboard />} />
           </Routes>
         </BrowserRouter>

@@ -4,6 +4,7 @@ import Challenge from "../models/Challenge.js"
 export async function getAllChallenge(req,res){
     try {
         const challenge = await Challenge.find();
+        // console.log("Get All Chall :")
         res.status(200).json(challenge)
     } catch (error) {
         console.log(error)
@@ -34,9 +35,17 @@ export async function addChallenge(req,res){
 export async function updateChallenge(req,res){
     res.send("")
 }
-export async function getAChallenge(req,res){ //use Session TOken or Cookies + ID?
+export async function getAChallenge(req,res){
     const {id} = req.params
-    const chall = await Challenge.findById({id})
-    console.log("")
-    // res.send(chall)
+    try {
+        const chall = await Challenge.findById(id)
+        // console.log(chall)
+        res.status(200).send(chall)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success:false,
+            message:"Internal Error !!"
+        })
+    }
 }

@@ -39,6 +39,14 @@ const userSchema = new mongoose.Schema({
     isAdmin:{
         type:Boolean,
         default:false
+    },
+    totalPoints:{
+        type:Number,
+        default:0
+    },
+    totalSolved:{
+        type:Number,
+        default:0
     }
 },{timestamps:true})
 

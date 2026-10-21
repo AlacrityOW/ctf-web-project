@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+// import mongoose from "mongoose"
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
 import Token from "../models/Token.js"
@@ -10,6 +10,11 @@ const hashM = process.env.HASH_AMOUNT
 //Personal Info
 export async function getPersonalData(req,res){ //Use ID? + cookies or token
     const user = await User.findById(req.userId)
+    // console.log(user)
+    res.status(200).json(user)
+}
+export async function getAllUser(req,res){
+    const user = await User.find({}).select("username school totalPoints")
     res.status(200).json(user)
 }
 export async function registAcc(req,res){
@@ -107,12 +112,12 @@ export async function refreshSesh(req, res){
     if (!refreshToken) return res.status(401).json({ error: "Refresh token missing" });
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
-        console.log(err)
+        // console.log(err)
         if (err) return res.status(403).json({ error: "Refresh token expired or modified" });
 
         const activeSession = await Token.findOne({ jti: decoded.jti, userId: decoded.sub });
         if (!activeSession) {
-            console.log(activeSession)
+            // console.log(activeSession)
             return res.status(403).json({ error: "Session has been manually revoked" });
         }
         const newAccessToken = jwt.sign({ 
@@ -159,8 +164,8 @@ export async function logoutAll(req,res){
 export async function findAccount(req,res){
     const {username} = req.body
     try {
-        const userlist = await User.find({username:{$regex:username}}).select("username")
-        console.log(userlist)
+        const userlist = await User.find({username:{$regex:username, $options:"i"}}).select("username")
+        // console.log(userlist)
         res.status(200).json(userlist)
         
     } catch (error) {
