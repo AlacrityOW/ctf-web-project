@@ -49,9 +49,13 @@ export default function AdminChallenges() {
       })
       if(res.data.success){
         setRefreshTrigger(prev => !prev)
-        setOpened(false);
         setFile(null)
-        setProgress(0)
+        setTimeout(()=>{
+          setProgress(0)
+        },500)
+        setTimeout(()=>{
+          setOpened(false);
+        },1000)
         // alert('Successfully added')
       }
     } catch (error) {
