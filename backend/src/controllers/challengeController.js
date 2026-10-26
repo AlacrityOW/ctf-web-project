@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import fs from 'fs'
 import Challenge from "../models/Challenge.js"
 
 export async function getAllChallenge(req,res){
@@ -16,23 +16,42 @@ export async function getAllChallenge(req,res){
     
 }
 export async function addChallenge(req,res){
-    const {title, category, difficulty, points, fileurl} = req.body
+    if (!req.file) {
+      return res.status(400).json({ msg: 'No file uploaded.' });
+    }
+    // console.log(req.body.data)
+    const {title, category, difficulty, points, flag} = JSON.parse(req.body.data)
+    const fileUrlForDatabase = `/${req.file.path.replace(/\\/g, '/')}`;
+    // console.log(fileUrlForDatabase)
     try {
-        const challenge = new Challenge({title, category, difficulty, points, fileurl})
+        const challenge = new Challenge({title:title, category:category, difficulty:difficulty, points:points, fileurl : fileUrlForDatabase, flag})
         await challenge.save()
         console.log("New Challenge Added")
         res.status(201).json({
             success:true
         })
     } catch (error) {
-        console.log(error)
+        if (req.file && req.file.path) {
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error('Failed to delete stray file during cleanup:', err);
+                else console.log('Successfully cleaned up stray file after database failure.');
+            });
+        }
+        if (error.name === 'ValidationError') {
+            console.error('Mongoose Validation Details:', error.errors);
+            return res.status(400).json({ error: 'Validation failed', details: error.errors });
+        }
+        // console.log(error)
         res.status(500).json({
             success:false,
             message:"Internal Error !!"
         })
-    } 
+    }
 }
 export async function updateChallenge(req,res){
+    res.send("")
+}
+export async function deleteChallenge(req,res){
     res.send("")
 }
 export async function getAChallenge(req,res){

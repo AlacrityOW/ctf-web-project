@@ -5,9 +5,9 @@ import User from '../models/User.js'
 export async function isUser(req,res,next){
     const header = req.headers['authorization']
     const token = header && header.split(' ')[1]
-    console.log("Token",token)
+    // console.log("Token",token)
     if(!token){
-        console.log("Token",token)
+        // console.log("Token",token)
         return res.status(401).json({msg:"No Access Token, Log In First!"})
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err,decoded)=>{
@@ -29,7 +29,7 @@ export async function isAdmin(req,res,next){
     const token = header && header.split(' ')[1]
     // console.log(token)
     if(!token){
-        console.log("Token",token)
+        // console.log("Token",token)
         return res.status(401).json({msg:"No Access Token, Log In First!"})
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err,decoded)=>{

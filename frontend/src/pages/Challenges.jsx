@@ -9,16 +9,6 @@ const difficultyColor = {
   Hard: 'red',
 };
 
-
-// const challenges = [
-//   { title: 'Baby\'s First Web', category: 'Web Exploitation', difficulty: 'Easy', points: 50 },
-//   { title: 'Caesar\'s Secret', category: 'Cryptography', difficulty: 'Easy', points: 50 },
-//   { title: 'Hidden in Plain Sight', category: 'Forensics', difficulty: 'Medium', points: 100 },
-//   { title: 'Stack Smash 101', category: 'Binary Exploitation', difficulty: 'Hard', points: 200 },
-//   { title: 'Packet Inspector', category: 'Networking', difficulty: 'Medium', points: 100 },
-//   { title: 'The Cipher Vault', category: 'Cryptography', difficulty: 'Hard', points: 200 },
-// ];
-
 export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
 

@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Challenges from './pages/Challenges';
 import Leaderboard from './pages/Leaderboard';
+import AdminChallenges from './pages/AdminChallenges'
+import AdminChallengePage from './pages/AdminChallengePage.jsx';
 import api, {setAccessTokenInMemory} from './api/axios.js'
 import ChallengePage from './pages/ChallengePage'
 
@@ -20,14 +22,6 @@ function BaseUrlRedirect({ isAuthenticated }) {
     <Navigate to="/home" replace />
   );
 }
-
-// const route = createBrowserRouter([{
-//   path:"challenges/:id",
-//   element:<ChallengePage/>,
-//   loader:challengeLoader,
-//   },
-
-// ])
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,18 +34,16 @@ export default function App() {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        // 1. Hit the refresh endpoint on boot. Browser sends the disk cookie automatically!
         const response = await api.post('/api/auth/refresh');
+        // console.log("REFRESH")
+        // console.log(response.data)
         const { accessToken } = response.data;
 
-        // 2. Save it to memory and flip our auth state to true
         setAccessTokenInMemory(accessToken);
         setIsAuthenticated(true);
       } catch (err) {
-        // Cookie was expired or missing - user is unauthenticated
         setIsAuthenticated(false);
       } finally {
-        // 3. Turn off loading screen once the network call settles
         setIsLoading(false);
       }
     };
@@ -88,7 +80,9 @@ export default function App() {
               }
             />
             <Route path="/challenges/:id" element={<ChallengePage/>}/>
+            <Route path="/admin/challenges/:id" element={<AdminChallengePage/>}/>
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/admin/challenges" element={<AdminChallenges />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

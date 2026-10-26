@@ -17,6 +17,10 @@ const challengeSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    flag:{
+        type: String,
+        required: true
+    },
     fileurl:{
         type:String,
         required:true

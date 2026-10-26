@@ -1,27 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Container, Title, Text, Table, Button, Modal, TextInput, Select, NumberInput, Stack, Group, Badge,
+  Container, Title, Text, Table, Button, Modal, TextInput, Select, NumberInput, Stack, Group, Badge, Progress, FileInput
 } from '@mantine/core';
-
-const initialChallenges = [
-  { title: "Baby's First Web", category: 'Web Exploitation', difficulty: 'Easy', points: 50 },
-  { title: "Caesar's Secret", category: 'Cryptography', difficulty: 'Easy', points: 50 },
-];
+import api from '../api/axios'
+import { useNavigate } from 'react-router-dom';
 
 const difficultyColor = { Easy: 'green', Medium: 'yellow', Hard: 'red' };
 
 export default function AdminChallenges() {
-  const [challenges, setChallenges] = useState(initialChallenges);
+  const [challenges, setChallenges] = useState([]);
+  const [progress, setProgress] = useState(0);
   const [opened, setOpened] = useState(false);
-  const [form, setForm] = useState({ title: '', category: '', difficulty: '', points: 50 });
+  const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
+  const [form, setForm] = useState({ title: '', category: '', difficulty: '', points: 50, flag: ''});
+  const navigate = useNavigate();
 
-  const handleAdd = () => {
-    setChallenges((prev) => [...prev, form]);
-    setForm({ title: '', category: '', difficulty: '', points: 50 });
-    setOpened(false);
+  useEffect(() => {
+    const getChallenges = async () => {
+      const response = await api.get("/api/ctf-challenges");
+      setChallenges(response.data);
+    };
+
+    getChallenges();
+  }, [refreshTrigger]);
+
+  const handleAdd = async (event) => {
+    try {
+      setForm({ title: '', category: '', difficulty: '', points: 50 ,flag : ''});
+  
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('data',JSON.stringify(form));
+  
+      setIsUploading(true);
+      // setProgress(0);
+      console.log(form)
+      const res = await api.post("/api/ctf-challenges/create",formData,{
+        onUploadProgress: (progressEvent) => {
+            const { loaded, total } = progressEvent;
+            if (total) {
+              // Calculate the percentage
+              const percentage = Math.round((loaded * 100) / total);
+              setProgress(percentage);
+            }
+          }
+      })
+      if(res.data.success){
+        setRefreshTrigger(prev => !prev)
+        setOpened(false);
+        setFile(null)
+        setProgress(0)
+        // alert('Successfully added')
+      }
+    } catch (error) {
+      console.log(error)
+      setFile(null)
+      setProgress(0)
+    }
   };
 
   return (
+    
     <Container size="lg" py={60}>
       <Group justify="space-between" mb="xl">
         <div>
@@ -42,7 +83,7 @@ export default function AdminChallenges() {
         </Table.Thead>
         <Table.Tbody>
           {challenges.map((c, i) => (
-            <Table.Tr key={i}>
+            <Table.Tr key={i} onClick={()=>navigate(`/admin/challenges/${c._id}`)}>
               <Table.Td>{c.title}</Table.Td>
               <Table.Td>{c.category}</Table.Td>
               <Table.Td>
@@ -78,6 +119,22 @@ export default function AdminChallenges() {
             value={form.points}
             onChange={(val) => setForm({ ...form, points: val })}
           />
+          
+          <TextInput
+            label="Flag"
+            placeholder="Put Flag Here"
+            value={form.flag}
+            onChange={(e) => setForm({ ...form, flag: e.target.value })}
+          />
+          <FileInput
+            label="Upload resume"
+            placeholder="Pick file"
+            value={file}
+            onChange={setFile}
+            accept="application/pdf"
+            clearable
+          />
+          <Progress value={progress}/>
           <Button onClick={handleAdd} mt="sm">Add</Button>
         </Stack>
       </Modal>
