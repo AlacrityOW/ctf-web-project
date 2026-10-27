@@ -47,6 +47,11 @@ const userSchema = new mongoose.Schema({
     totalSolved:{
         type:Number,
         default:0
+    },
+    completedList:{
+        type:[{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Challenge'}],
+        default: []
     }
 },{timestamps:true})
 

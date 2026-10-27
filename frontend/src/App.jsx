@@ -62,8 +62,6 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            {/* FIXED: Uses the sub-wrapper to cleanly manage state routing */}
-            {/* <Route path="/" element={<BaseUrlRedirect isAuthenticated={isAuthenticated} />} /> */}
             
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login onAuthSuccess={handleAuthSuccess} />} /> 

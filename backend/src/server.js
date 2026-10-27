@@ -9,7 +9,7 @@ import authRoutes from './routes/authRoutes.js'
 
 dotenv.config()
 const app = express();
-const PORT = process.env.PORT || 1770
+const PORT = process.env.PORT || 1770  //DONT FORGET TO CHANGE AT FRONTEND .env if not using 1770
 connectDB()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
@@ -19,13 +19,12 @@ app.use(cors({
     origin:"http://localhost:5173",
     credentials:true,
 }))
-//CHeck if user is already logged in, move him to Dashboard, otherwise move to Login page
-// Apply auth to all API here
-//Logins (GET for profile info?; POST for login; PUT for name?; DELETE for account terminate)
+//auth(Get profile data, refresh token, verification and registration, account search, Force Logouts)
+//=========DONE==========DONE================DONE========================WIP============WIP=========
 app.use("/api/auth",authRoutes)
-//ctf-challenges(GET for challenge all, search, and sorting; POST for new challenge by Admin; PUT to edit Challenge; DELETE to remove challenge)
+//ctf-challenges(GET for challenge all, search, and specific challenge; POST for new challenge by Admin; PUT to edit Challenge; DELETE to remove challenge)
+//=============================WIP(search)=============================================DONE=========================WIP=======================WIP=================
 app.use("/api/ctf-challenges",challengeRoutes)
-
 
 app.listen(PORT, ()=>{
     console.log("Opened at :", PORT)

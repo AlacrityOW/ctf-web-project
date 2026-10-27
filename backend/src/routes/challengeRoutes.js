@@ -3,7 +3,7 @@ import multer from 'multer'
 import fs from 'fs'
 
 import { isAdmin, isUser } from '../middleware/auth.js'
-import { getAllChallenge, getAChallenge, addChallenge,updateChallenge, deleteChallenge } from '../controllers/challengeController.js'
+import { getAllChallenge, getAChallenge, addChallenge,updateChallenge, deleteChallenge, checkAnswer, downloadChallenge } from '../controllers/challengeController.js'
 
 const router = express.Router()
 
@@ -28,10 +28,17 @@ const upload = minst({
     }
 })
 
+
+//USER PRIVILEGES
 router.get("/", isUser,getAllChallenge)
+router.get("/:id/download",isUser,downloadChallenge)
+router.get("/:id",isUser,getAChallenge)
+router.patch("/:id/check-ans",isUser,checkAnswer)
+
+//ADMIN PRIVILEGES
 router.post("/create",isUser,isAdmin,upload.single('file'),addChallenge)
 router.put("/edit-challenge",isUser,isAdmin,updateChallenge)
 router.delete("/remove-challenge/:id",isUser,isAdmin,deleteChallenge)
-router.get("/:id",isUser,getAChallenge)
+
 
 export default router

@@ -1,4 +1,5 @@
-.env*
+.env
 node_modules/
 *.log
+#Remove This one Later (maybe? upload if want to preserve ig)
 uploads/
