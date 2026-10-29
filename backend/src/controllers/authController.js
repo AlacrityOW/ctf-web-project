@@ -52,7 +52,7 @@ export async function registAcc(req,res){
         console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }
@@ -102,7 +102,7 @@ export async function loginVerif(req,res){
         console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }
@@ -137,7 +137,7 @@ export async function logoutSingle(req,res){
         } catch (error) {
             res.status(500).json({
                 success:false,
-                message:"Token is not here"
+                msg:"Token is not here"
             })
         }
         res.clearCookie('refreshToken',{ httpOnly: true, secure: true, sameSite: 'strict' })
@@ -155,7 +155,7 @@ export async function logoutAll(req,res){
         await Token.deleteMany({ userId: decoded.sub });
     
         res.clearCookie('refreshToken', { httpOnly: true, secure: true, sameSite: 'strict' });
-        return res.json({ message: "Logged out of all devices successfully" });
+        return res.json({ msg: "Logged out of all devices successfully" });
     } catch (error) {
         return res.status(403).json({ error: "Invalid session" });
     }
@@ -171,7 +171,7 @@ export async function findAccount(req,res){
     } catch (error) {
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }

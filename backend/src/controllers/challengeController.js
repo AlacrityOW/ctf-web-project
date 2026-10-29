@@ -5,20 +5,44 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 import { access, constants } from 'node:fs/promises';
 
+
+//DONE
 export async function getAllChallenge(req,res){
     try {
-        const challenge = await Challenge.find();
-        // console.log("Get All Chall :")
-        res.status(200).json(challenge)
+        const page = parseInt(req.query.page) || 1
+        const limit  = parseInt(req.query.viewSize) || 10
+        console.log(req.query)
+
+        const safeLimit = Math.min(limit,30)
+
+        const skip = (page - 1)* safeLimit
+
+
+        const challenge = await Challenge.find()
+            .select('title category difficulty points')
+            .skip(skip)
+            .limit(safeLimit)
+            .sort({createdAt:-1})
+        
+        const total = await Challenge.countDocuments()
+        res.status(200).json({
+            success:true,
+            currentPage: page,
+            viewSize:safeLimit,
+            totalPages:Math.ceil(total/safeLimit),
+            data:challenge
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
     
 }
+
+//DONE
 export async function addChallenge(req,res){
     if (!req.file) {
       return res.status(400).json({ msg: 'No file uploaded.' });
@@ -48,16 +72,48 @@ export async function addChallenge(req,res){
         // console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }
+
+// WIP
 export async function updateChallenge(req,res){
-    res.send("")
+    const {id} = req.params
+    try {
+        const chall = await Challenge.findById(id)
+        //log updated file and the old file for rollback
+        // apply change after
+        //and also the files at uploads/
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success:false,
+            msg:"Internal Error !!"
+        })
+    }
 }
+
+// WIP
 export async function deleteChallenge(req,res){
-    res.send("")
+    const {id} = req.params
+    try {
+        const chall = await Challenge.findById(id)
+        //Log the user who deletes the file?
+        // THen delete the data from database
+        //and also the files at uploads/
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success:false,
+            msg:"Internal Error !!"
+        })
+    }
 }
+
+//DONE
 export async function getAChallenge(req,res){
     const {id} = req.params
     try {
@@ -68,42 +124,54 @@ export async function getAChallenge(req,res){
         console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }
 
+// DONE
 export async function checkAnswer(req,res){
-    // console.log(req.body)
     try {
         const {id} = req.params
-        const user = await User.findById(req.userId)
+        const {answer} = req.body
+
         const chall = await Challenge.findById(id)
-        const completed = user.completedList.some(cid => cid.toString() === id)
-        if(completed){
+        if(!chall){
+            return res.status(404).json({msg:"Challenge Not Found!"})
+        }
+        if (chall.flag !== answer) {
+            return res.status(422).json({ msg: "You got it wrong!" });
+        }
+
+        const result = await User.updateOne(
+            { 
+                _id: req.userId, 
+                completedList: { $ne: id }
+            },
+            { 
+                $inc: { 
+                    totalPoints: chall.points,
+                    totalSolved: 1 
+                },
+                $push: { completedList: id } // Atomically appends to the array
+            }
+        );
+        if(result.modifiedCount === 0){
             return res.status(400).json({msg:"Already Completed >:("})
         }
-        // console.log(chall.flag, answer)
-        const {answer} = req.body
-        if(chall.flag == answer){
-            // console.log(user)
-            user.totalPoints = user.totalPoints + chall.points
-            user.totalSolved += 1
-            user.completedList.push(id)
-            await user.save()
-            res.status(200).json({msg:"Correct Answer HERE"})
-        }else{
-            res.status(422).json({msg:"Wrong Answer Too BAD"})
-        }
+        res.status(200).json({msg:"Completed The Challenge"})
+        
     } catch (error) {
         console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }
 
+
+//WORKS
 export async function downloadChallenge(req,res){
     const __dirname = path.dirname(fileURLToPath(import.meta.url))
     // console.log(__dirname)
@@ -115,10 +183,10 @@ export async function downloadChallenge(req,res){
         }
 
         const filepath = path.join(__dirname,'../..',filedata.fileurl)
-        console.log(filepath)
+        // console.log(filepath)
         try {
             const test = await access(filepath, constants.F_OK)
-            console.log(test)
+            // console.log(test)
         } catch (fserror) {
             console.log(fserror)
             return res.status(404).json({msg:"File path INVALID"})
@@ -128,7 +196,7 @@ export async function downloadChallenge(req,res){
             if(dlerr){
                 console.log("Download Err: ",dlerr)
                 if (!res.headersSent) {
-                    res.status(500).json({ message: "Error downloading the file." });
+                    res.status(500).json({ msg: "Error downloading the file." });
                 }
             }
         })
@@ -136,7 +204,7 @@ export async function downloadChallenge(req,res){
         console.log(error)
         res.status(500).json({
             success:false,
-            message:"Internal Error !!"
+            msg:"Internal Error !!"
         })
     }
 }
