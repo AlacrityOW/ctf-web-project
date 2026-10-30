@@ -14,9 +14,11 @@ export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
   const [totalPages, setTotalPages] = useState(1)
   
-  const [page, setPage] = useState(1)
+  // const [page, setPage] = useState(1)
   const [searchParams, setSearchParams]=useSearchParams()
-  let size = parseInt(searchParams.get("size")) || 10
+  const maxLimit = 15
+  const size = parseInt(searchParams.get("size")) || 10
+  const page = parseInt(searchParams.get('page')) || 1
 
   useEffect(() => {
     const getChallenges = async (page,viewSize) => {
@@ -50,11 +52,19 @@ export default function Challenges() {
         }else{
           prev.set('size',String(val))
         }
-        
+        prev.set('page',1)
         return prev
       })
   }
   
+  const handlePage = (num) =>{
+      const val = Number(num)
+      setSearchParams((prev)=>{
+        prev.set('page', String(val))
+        return prev
+      })
+  }
+
   return (
     <Container size="lg" py={60}>
         
@@ -79,8 +89,8 @@ export default function Challenges() {
           </Card>
         ))}
       </SimpleGrid>
-      <Pagination mx="auto"mt="auto" total={totalPages} value={page} onChange={setPage} />
-      <NumberInput mx="auto" w={100} min={1} max={50} onChange={handleSize} value={size}></NumberInput> 
+      <Pagination mx="auto"mt="auto" total={totalPages} value={page} onChange={handlePage} />
+      <NumberInput mx="auto" w={100} min={1} max={maxLimit} onChange={handleSize} value={size}></NumberInput> 
       </Stack>
       
     </Container>

@@ -28,7 +28,14 @@ export default function AdminChallengePage() {
         }
         getPage();
     },[])
-
+    const handleDelete = async () =>{
+        try {
+            const res = await api.patch(`/api/ctf-challenges/remove-challenge/${id}`)
+            console.log(res.data.msg)
+        } catch (error) {
+            console.log(error.response.data)
+        }
+    }
     const ansCheck = async() =>{
         try {
             console.log("Ans :",challenge.flag)
@@ -79,7 +86,7 @@ export default function AdminChallengePage() {
     if(!challenge) return <div>No Data</div>
     return (
         <Container size="lg" py={60}>
-            <Button mr={20}>Delete</Button>
+            <Button mr={20} onClick={handleDelete}>Delete</Button>
             <Button>Update</Button>
             <Title mb="xs">{challenge.title}</Title>
             <Text size="lg" c="dimmed" mb="md">{challenge.category}</Text>

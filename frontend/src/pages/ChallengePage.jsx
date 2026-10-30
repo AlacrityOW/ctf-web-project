@@ -34,7 +34,7 @@ export default function challengePage() {
             if(answer === challenge.flag){
                 console.log("Correct Flag")
                 const res = await api.patch(`/api/ctf-challenges/${id}/check-ans`,{answer:answer})
-                console.log(res.data.msg)
+                // console.log(res.data.msg)
             }else{
                 console.log("Wrong Flag")
             }
@@ -75,7 +75,7 @@ export default function challengePage() {
     }
 
     if(loading) return <div>Loading . .</div>
-    if(!challenge) return <div>No Data</div>
+    if(!challenge) return <div>This Challenge is not available . .</div>
     return (
         <Container size="lg" py={60}>
             <Title mb="xs">{challenge.title}</Title>
