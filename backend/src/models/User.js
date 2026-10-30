@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema({
         type:[{type: mongoose.Schema.Types.ObjectId,
         ref: 'Challenge'}],
         default: []
+    },
+    isDeleted:{
+        type: Boolean,
+    },
+    deletedAt:{
+        type:Date
     }
 },{timestamps:true})
 

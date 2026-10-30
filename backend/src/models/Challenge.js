@@ -24,6 +24,12 @@ const challengeSchema = new mongoose.Schema({
     fileurl:{
         type:String,
         required:true
+    },
+    isDeleted:{
+        type:Boolean,
+    },
+    deletedAt:{
+        type:Date,
     }
 }, {timestamps:true})
 

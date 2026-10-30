@@ -6,25 +6,26 @@ import { fileURLToPath } from 'url';
 import { access, constants } from 'node:fs/promises';
 
 
-//DONE
+//DONE | CHANGED FROM LOOK ALL UP, TO DEDICATED PAGINATION
 export async function getAllChallenge(req,res){
     try {
         const page = parseInt(req.query.page) || 1
         const limit  = parseInt(req.query.viewSize) || 10
-        console.log(req.query)
+        // console.log(req.query)
 
-        const safeLimit = Math.min(limit,30)
+        const safeLimit = Math.min(limit,20)
 
         const skip = (page - 1)* safeLimit
 
-
-        const challenge = await Challenge.find()
+        const challenge = await Challenge.find({isDeleted:{$ne:true}})
             .select('title category difficulty points')
             .skip(skip)
             .limit(safeLimit)
             .sort({createdAt:-1})
         
-        const total = await Challenge.countDocuments()
+        const total = await Challenge.countDocuments({
+            isDeleted:{$ne:true}
+        })
         res.status(200).json({
             success:true,
             currentPage: page,
@@ -42,7 +43,7 @@ export async function getAllChallenge(req,res){
     
 }
 
-//DONE
+//DONE | NO MIMETYPE FILTER YET
 export async function addChallenge(req,res){
     if (!req.file) {
       return res.status(400).json({ msg: 'No file uploaded.' });
@@ -52,7 +53,7 @@ export async function addChallenge(req,res){
     const fileUrlForDatabase = `/${req.file.path.replace(/\\/g, '/')}`;
     // console.log(fileUrlForDatabase)
     try {
-        const challenge = new Challenge({title:title, category:category, difficulty:difficulty, points:points, fileurl : fileUrlForDatabase, flag})
+        const challenge = new Challenge({title, category, difficulty, points, fileurl : fileUrlForDatabase, flag})
         await challenge.save()
         console.log("New Challenge Added")
         res.status(201).json({
@@ -86,6 +87,7 @@ export async function updateChallenge(req,res){
         // apply change after
         //and also the files at uploads/
         
+        
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -99,10 +101,22 @@ export async function updateChallenge(req,res){
 export async function deleteChallenge(req,res){
     const {id} = req.params
     try {
-        const chall = await Challenge.findById(id)
-        //Log the user who deletes the file?
-        // THen delete the data from database
-        //and also the files at uploads/
+        const result = await Challenge.updateOne({
+            _id:id
+        },{
+            $set:{
+                isDeleted: true,
+                deletedAt: new Date()
+            }
+        })
+        if(result.modifiedCount === 0){
+            console.log("Challenge alr deleted")
+            return res.status(400).json({msg:"Challenge Already Deleted"})
+        }
+        // Soft Delete then CRON will delete after 30 days
+        // create new Log then save
+        console.log("Challenge Deleted*")
+        res.status(200).json({msg:"Challenge is deleted"})
         
     } catch (error) {
         console.log(error)
@@ -117,7 +131,12 @@ export async function deleteChallenge(req,res){
 export async function getAChallenge(req,res){
     const {id} = req.params
     try {
-        const chall = await Challenge.findById(id)
+        const chall = await Challenge.findOne(
+            {
+                _id:id,
+                isDeleted:{$ne:true}
+            }
+        )
         // console.log(chall)
         res.status(200).send(chall)
     } catch (error) {
@@ -173,8 +192,9 @@ export async function checkAnswer(req,res){
 
 //WORKS
 export async function downloadChallenge(req,res){
-    const __dirname = path.dirname(fileURLToPath(import.meta.url))
-    // console.log(__dirname)
+    // const __dirname = path.dirname(fileURLToPath(import.meta.url))
+    // console.log('Old Dir name',__dirname)
+    // console.log('new Dir name',import.meta.dirname)
     try {
         const {id} = req.params
         const filedata = await Challenge.findById(id)
@@ -182,7 +202,7 @@ export async function downloadChallenge(req,res){
             return res.status(404).json({msg:"Challenge Doesn't Exist!"})
         }
 
-        const filepath = path.join(__dirname,'../..',filedata.fileurl)
+        const filepath = path.join(import.meta.dirname,'../..',filedata.fileurl)
         // console.log(filepath)
         try {
             const test = await access(filepath, constants.F_OK)

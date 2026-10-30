@@ -86,9 +86,10 @@ export async function loginVerif(req,res){
         },process.env.REFRESH_TOKEN_SECRET,{expiresIn:'7d'})
 
         await Token.create({userId:user._id, jti:tokenMatch})
+        // SET SECURE TO TRUE WHEN DEPLOYED
         res.cookie('refreshToken', refreshToken,{
             httpOnly: true,
-            secure: true,
+            secure: false,
             sameSite: 'strict',
             maxAge: 7*24*60*60*1000
         })

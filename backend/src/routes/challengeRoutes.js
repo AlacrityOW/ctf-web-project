@@ -38,7 +38,7 @@ router.patch("/:id/check-ans",isUser,checkAnswer)
 //ADMIN PRIVILEGES
 router.post("/create",isUser,isAdmin,upload.single('file'),addChallenge)
 router.put("/edit-challenge",isUser,isAdmin,updateChallenge)
-router.delete("/remove-challenge/:id",isUser,isAdmin,deleteChallenge)
+router.patch("/remove-challenge/:id",isUser,isAdmin,deleteChallenge)
 
 
 export default router

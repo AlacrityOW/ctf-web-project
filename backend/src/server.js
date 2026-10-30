@@ -3,6 +3,7 @@ import { connectDB } from './config/db.js'
 import dotenv from 'dotenv'
 import cors from 'cors';
 import cookieParser from 'cookie-parser'
+import './tasks/cron.js'
 
 import challengeRoutes from './routes/challengeRoutes.js'
 import authRoutes from './routes/authRoutes.js'
@@ -10,15 +11,21 @@ import authRoutes from './routes/authRoutes.js'
 dotenv.config()
 const app = express();
 const PORT = process.env.PORT || 1770  //DONT FORGET TO CHANGE AT FRONTEND .env if not using 1770
-connectDB()
+await connectDB()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
+// LOCAL TESTING
 app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true,
+    origin:'http://localhost:5173',
+    credentials:true
 }))
+//FOR LATER WHEN DEPLOYED
+// app.use(cors({
+//     origin:`http://${process.env.IP}:5173`,
+//     credentials:true,
+// }))
 //auth(Get profile data, refresh token, verification and registration, account search, Force Logouts)
 //=========DONE==========DONE================DONE========================WIP============WIP=========
 app.use("/api/auth",authRoutes)
@@ -26,6 +33,6 @@ app.use("/api/auth",authRoutes)
 //=============================WIP(search)=============================================DONE=========================WIP=======================WIP=================
 app.use("/api/ctf-challenges",challengeRoutes)
 
-app.listen(PORT, ()=>{
+app.listen(PORT, '0.0.0.0', ()=>{
     console.log("Opened at :", PORT)
 })
