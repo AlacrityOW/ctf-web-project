@@ -1,7 +1,8 @@
 import cron from 'node-cron'
 import Challenge from '../models/Challenge.js'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import path from 'path'
+import AuditLog from '../models/AuditLog.js'
 
 
 const periodicCleanup = async() =>{
@@ -43,10 +44,43 @@ const periodicCleanup = async() =>{
     }
 }
 
+const exportMonthlyLog = async() =>{
+    const curr = new Date()
+    if(curr.getDate()!==1) return;
+    console.log('Monthly Log Export . .')
+    try {
+        const year = curr.getFullYear()
+        const month = curr.getMonth()
+    
+        const sd = new Date(year, month-1,1)
+        const ed = new Date(year, month,1)
+
+        const logs = await AuditLog.find({
+            createdAt:{
+                $gte:sd,
+                $lt:ed
+            }
+        }).lean()
+        if(logs.length === 0) return console.log('Nothing to export . . .')
+
+        const logPath = path.join(import.meta.dirname,'../..','logs')
+        await fs.mkdir(logPath,{recursive:true})
+        const fname = `audit-log-${year}-${month}.json`
+        const logFiledir = path.join(logPath,fname)
+
+        await fs.writeFile(logFiledir,JSON.stringify(logs, null, 2),'utf-8')
+        console.log('Successfully Exported Monthly Log . .')
+        
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 cron.schedule('* 0 0 * * *', async () =>{
     console.log('CRON Running . . .')
     try {
         await periodicCleanup()
+        await exportMonthlyLog()
         console.log('CRON Done')
     } catch (error) {
         console.log(error)

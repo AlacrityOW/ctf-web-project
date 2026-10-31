@@ -12,10 +12,10 @@ dotenv.config()
 const app = express();
 const PORT = process.env.PORT || 1770  //DONT FORGET TO CHANGE AT FRONTEND .env if not using 1770
 await connectDB()
+app.set('trust proxy', true)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
-
 // LOCAL TESTING
 app.use(cors({
     origin:'http://localhost:5173',

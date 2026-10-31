@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  Container, Title, Text, Table, Button, Modal, TextInput, Select, NumberInput, Stack, Group, Badge, Progress, FileInput, Pagination,Box
+  Container, Title, Text, Table, Button, Modal, TextInput, Select, NumberInput, Stack, Group, Badge, Progress, FileInput, Pagination,
 } from '@mantine/core';
 import api from '../api/axios'
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -80,13 +80,33 @@ export default function AdminChallenges() {
         // alert('Successfully added')
       }
     } catch (error) {
-      console.log(error)
+      console.log(error.response.data)
       setFile(null)
       setProgress(0)
     }
   };
-
-
+  const undoDelete = async (e) =>{
+    try {
+        const res = await api.patch(`/api/ctf-challenges/restore-challenge/${e}`)
+        if(res.data.success){
+          console.log(res.data.msg)
+        }
+        setRefreshTrigger(prev => !prev)
+    } catch (error) {
+        console.log(error.response.data)
+    }
+  }
+  const handleDelete = async (e) =>{
+        try {
+            const res = await api.patch(`/api/ctf-challenges/remove-challenge/${e}`)
+            if(res.data.success){
+              console.log(res.data.msg)
+            }
+            setRefreshTrigger(prev => !prev)
+        } catch (error) {
+            console.log(error.response.data)
+        }
+    }
   const handleSize = (num) =>{
       const val = Number(num)
       setSearchParams((prev)=>{
@@ -126,17 +146,21 @@ export default function AdminChallenges() {
               <Table.Th>Category</Table.Th>
               <Table.Th>Difficulty</Table.Th>
               <Table.Th>Points</Table.Th>
+              <Table.Th>Action</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {challenges.map((c, i) => (
-              <Table.Tr key={i} onClick={()=>navigate(`/admin/challenges/${c._id}`)}>
-                <Table.Td>{c.title}</Table.Td>
+              <Table.Tr key={i} >
+                <Table.Td onClick={()=>navigate(`/admin/challenges/${c._id}`)}>{c.title}</Table.Td>
                 <Table.Td>{c.category}</Table.Td>
                 <Table.Td>
                   <Badge color={difficultyColor[c.difficulty]} variant="light">{c.difficulty}</Badge>
                 </Table.Td>
                 <Table.Td>{c.points}</Table.Td>
+                <Table.Td>
+                  <Button onClick={c.isDeleted ? ()=>undoDelete(c._id) : ()=>handleDelete(c._id)}>{c.isDeleted ? 'Restore' : 'Delete'}</Button>
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
@@ -145,23 +169,27 @@ export default function AdminChallenges() {
         <Modal opened={opened} onClose={() => setOpened(false)} title="Add Challenge">
           <Stack>
             <TextInput
+              required
               label="Title"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
             <TextInput
+              required
               label="Category"
               placeholder="e.g. Web Exploitation"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             />
             <Select
+              required
               label="Difficulty"
               data={['Easy', 'Medium', 'Hard']}
               value={form.difficulty}
               onChange={(val) => setForm({ ...form, difficulty: val })}
             />
             <NumberInput
+              required
               label="Points"
               min={0}
               max={100}
@@ -170,13 +198,15 @@ export default function AdminChallenges() {
             />
             
             <TextInput
+              required
               label="Flag"
               placeholder="Put Flag Here"
               value={form.flag}
               onChange={(e) => setForm({ ...form, flag: e.target.value })}
             />
             <FileInput
-              label="Upload resume"
+              required
+              label="Upload File"
               placeholder="Pick file"
               value={file}
               onChange={setFile}
@@ -189,6 +219,7 @@ export default function AdminChallenges() {
         </Modal>
         <Pagination mx="auto"mt="auto" total={totalPages} value={page} onChange={handlePage} />
         <NumberInput mx="auto" w={100} min={1} max={maxLimit} onChange={handleSize} value={size}></NumberInput> 
+        
       </Stack>
     </Container>
   );
